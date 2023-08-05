@@ -25,6 +25,10 @@ public:
     // set color modulation
     void set_color(uint8_t red, uint8_t green, uint8_t blue);
 
+    // alpha modulation stuff
+    void set_blend_mode(SDL_BlendMode blending);
+    void set_alpha(uint8_t alpha);
+
     //Deallocates texture
     void free();
 
@@ -88,6 +92,10 @@ MyTexture sprite_sheet_texture;
 
 // color modulated texture
 MyTexture color_mod_texture;
+
+// fade in and out texture
+MyTexture fade_in_texture;
+MyTexture fade_out_texture;
 
 const int SCREEN_WIDTH = 600;
 const int SCREEN_HEIGHT = 600;
@@ -181,6 +189,14 @@ void MyTexture::set_color(uint8_t red, uint8_t green, uint8_t blue){
     // so like if red =255= blue and green = 0
     // then all of the green in the texture will disapear
     SDL_SetTextureColorMod(this->texture, red, green, blue);
+}
+
+void MyTexture::set_blend_mode(SDL_BlendMode blending){
+    SDL_SetTextureBlendMode(this->texture, blending);
+}
+
+void MyTexture::set_alpha(uint8_t alpha){
+    SDL_SetTextureAlphaMod(this->texture, alpha);
 }
 
 // end class def
@@ -291,6 +307,16 @@ bool load_media(){
         return false;
     }
 
+    if(!fade_out_texture.load_from_file("images/fadeout.png")){
+        return false;
+    }
+
+    fade_out_texture.set_blend_mode(SDL_BLENDMODE_BLEND);
+
+    if(!fade_in_texture.load_from_file("images/fadein.png")){
+        return false;
+    }
+
     return true;
 }
 
@@ -387,10 +413,13 @@ int main() {
     bool toggle_color_key_scene = false;
     bool toggle_sprite_sheet = false;
     bool toggle_color_modulation = false;
+    bool toggle_alpha_modulation = false;
 
     uint8_t r = 255;
     uint8_t g = 255;
     uint8_t b = 255;
+
+    uint8_t a = 255;
     while(!done) {
         while( SDL_PollEvent( &e ) != 0) {
             if (e.type == SDL_QUIT) {
@@ -403,6 +432,7 @@ int main() {
                 toggle_color_key_scene = false;
                 toggle_sprite_sheet = false;
                 toggle_color_modulation = false;
+                toggle_alpha_modulation = false;
                 switch (e.key.keysym.sym) {
                     case SDLK_UP:
                         current_surface = key_press_surfaces[KEY_PRESS_SURFACE_UP];
@@ -436,6 +466,9 @@ int main() {
                         break;
                     case SDLK_m:
                         toggle_color_modulation = true;
+                        break;
+                    case SDLK_a:
+                        toggle_alpha_modulation = true;
                         break;
                     default:
                         current_surface = key_press_surfaces[KEY_PRESS_SURFACE_DEFAULT];
@@ -550,6 +583,21 @@ int main() {
 
             color_mod_texture.set_color(r, g, b);
             color_mod_texture.render(0, 0);
+
+            SDL_RenderPresent(renderer);
+        }
+        else if (toggle_alpha_modulation) {
+            if(a != 0) {
+                a--;
+            }
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderClear(renderer);
+
+            fade_in_texture.render(0, 0);
+
+            // render front blended
+            fade_out_texture.set_alpha(a);
+            fade_out_texture.render(0, 0);
 
             SDL_RenderPresent(renderer);
         }
