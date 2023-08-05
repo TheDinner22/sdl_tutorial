@@ -1,0 +1,12 @@
+-Wall
+-Wextra
+-std=c++17
+-ggdb
+-MMD
+-MP
+-Iinclude
+-Isrc
+-Llib
+-lSDL2
+
+-I/usr/include/SDL2
