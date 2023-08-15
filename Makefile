@@ -15,7 +15,7 @@ BUILD := build
 
 # Library search directories and flags
 EXT_LIB :=
-LDFLAGS := -lSDL2 -lSDL2_image
+LDFLAGS := -lSDL2 -lSDL2_image -lSDL2_ttf
 LDPATHS := $(addprefix -L,$(LIB) $(EXT_LIB))
 
 # Include directories
