@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+// on loadFromRenderedText method impl
+
 //Texture wrapper class
 class MyTexture {
 private:
@@ -22,6 +24,9 @@ public:
 
     //Loads image at specified path
     bool load_from_file( const char* path );
+
+    // loads from font string
+    bool load_from_rendered_text(const char* texture_text, SDL_Color text_color);
 
     // set color modulation
     void set_color(uint8_t red, uint8_t green, uint8_t blue);
@@ -61,16 +66,21 @@ void print_sdl_image_error(const char* msg) {
     std::cout << msg << IMG_GetError() << std::endl;
 }
 
+void print_sdl_ttf_error(const char* msg) {
+    std::cout << msg << TTF_GetError() << std::endl;
+}
+
 // gloabal variables
 SDL_Window *window = NULL;
-SDL_Surface *screen_surface = NULL;
 
 SDL_Renderer* renderer = NULL;
 
 const int SCREEN_WIDTH = 600;
 const int SCREEN_HEIGHT = 600;
 
-MyTexture arrow;
+TTF_Font* font = NULL;
+
+MyTexture text_texture;
 
 // class def
 
@@ -109,6 +119,31 @@ bool MyTexture::load_from_file(const char* path) {
     SDL_FreeSurface(loaded_surface);
 
     this->texture = loaded_texture;
+    return true;
+}
+
+bool MyTexture::load_from_rendered_text(const char* text, SDL_Color text_color) {
+    this->free();
+
+    // render text surface
+    SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, text_color);
+    if (text_surface == NULL) {
+        print_sdl_ttf_error("unable to render text as surface!");
+        return false;
+    }
+
+    // create texture from surface pixels
+    this->texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    if (this->texture == NULL) {
+        print_sdl_error("unable to create texture from surface");
+        return false;
+    }
+
+    this->width = text_surface->w;
+    this->height = text_surface->h;
+
+    SDL_FreeSurface(text_surface);
+
     return true;
 }
 
