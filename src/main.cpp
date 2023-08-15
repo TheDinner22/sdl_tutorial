@@ -1,4 +1,3 @@
-#include "SDL_render.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
@@ -70,6 +69,8 @@ SDL_Renderer* renderer = NULL;
 const int SCREEN_WIDTH = 600;
 const int SCREEN_HEIGHT = 600;
 
+MyTexture arrow;
+
 // class def
 
 MyTexture::MyTexture() : texture(NULL), width(0), height(0) { }
@@ -127,8 +128,8 @@ void MyTexture::render( int x, int y, SDL_Rect* clip, double angle, SDL_Point* c
 
     // just me but i prefer the image fit the screen
     // this code is not part of tutorial
-    render_quad.w = SCREEN_WIDTH;
-    render_quad.h = SCREEN_HEIGHT;
+    // render_quad.w = SCREEN_WIDTH;
+    // render_quad.h = SCREEN_HEIGHT;
 
     // if there is a clip apply it
     if (clip != NULL) {
@@ -202,6 +203,9 @@ bool init() {
 }
 
 bool load_media(){
+    if (!arrow.load_from_file("images/arrow.png")) {
+        return false;
+    }
 
     return true;
 }
@@ -263,15 +267,45 @@ int main() {
 
     bool done = false;
     SDL_Event e;
+
+    double degrees = 0.0;
+    SDL_RendererFlip flip_type = SDL_FLIP_NONE;
     while(!done) {
         while( SDL_PollEvent( &e ) != 0) {
             if (e.type == SDL_QUIT) {
                 done = true;
             }
+            else if (e.type == SDL_KEYDOWN) {
+                switch (e.key.keysym.sym) {
+                    case SDLK_x:
+                        degrees -= 20;
+                        break;
+
+                    case SDLK_c:
+                        degrees += 20;
+                        break;
+
+                    case SDLK_h:
+                        flip_type = SDL_FLIP_HORIZONTAL;
+                        break;
+
+                    case SDLK_n:
+                        flip_type = SDL_FLIP_NONE;
+                        break;
+
+                    case SDLK_v:
+                        flip_type = SDL_FLIP_VERTICAL;
+                        break;
+                }
+            }
         }
+
+        // render arrow
+        arrow.render(( SCREEN_WIDTH - arrow.get_width() ) / 2, ( SCREEN_HEIGHT - arrow.get_height() ) / 2, NULL, degrees, NULL, flip_type);
 
         SDL_RenderPresent(renderer);
         SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
     }
     close();
