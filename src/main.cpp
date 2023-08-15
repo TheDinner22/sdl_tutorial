@@ -1,3 +1,4 @@
+#include "SDL_render.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
@@ -33,7 +34,7 @@ public:
     void free();
 
     //Renders texture at given point
-    void render( int x, int y, SDL_Rect* clip = NULL );
+    void render( int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE );
 
     //Gets image dimensions
     int get_width();
@@ -152,7 +153,7 @@ void MyTexture::free() {
     this->texture = NULL;
 }
 
-void MyTexture::render(int x, int y, SDL_Rect* clip) {
+void MyTexture::render( int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
     SDL_Rect render_quad = {x, y, this->width, this->height};
 
     // just me but i prefer the image fit the screen
@@ -166,16 +167,12 @@ void MyTexture::render(int x, int y, SDL_Rect* clip) {
         render_quad.h = clip->h;
     }
 
-    // what is a clip?
-    // it is a portion of a texture that we want to render
-    // we overwrite the render_quads width and height with the clips because 
-    // we only want to render a portion of the texture
-    //
-    // we also pass the clip into the SDL_RenderCopy function 
-    // and SDL will handle rendering a portion of the texture for us
+    // for rotation and fliping it is ez af!
+    // just pass shit into the SDL_RenderCopyEx function
+    // and SDL will handle the rest for you
 
     // render to screen
-    SDL_RenderCopy(renderer, this->texture, clip, &render_quad);
+    SDL_RenderCopyEx(renderer, this->texture, clip, &render_quad, angle, center, flip);
 }
 
 int MyTexture::get_width() { return width; }
