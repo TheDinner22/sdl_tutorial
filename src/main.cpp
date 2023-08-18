@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-// on loadFromRenderedText method impl
+// need to impl the load_media function
 
 //Texture wrapper class
 class MyTexture {
@@ -232,6 +232,11 @@ bool init() {
   const bool init_worked = IMG_Init(img_flags) & img_flags;
   if (!init_worked) {
       print_sdl_image_error("the sdl_image extension could not init: ");
+      return false;
+  }
+
+  if (TTF_Init() == -1){
+      print_sdl_ttf_error("could not init TTF");
       return false;
   }
 
